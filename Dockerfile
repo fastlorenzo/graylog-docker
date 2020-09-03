@@ -18,6 +18,7 @@ RUN \
 RUN \
   curl \
     --silent \
+    -k \
     --location \
     --retry 3 \
     --output "/tmp/graylog-${GRAYLOG_VERSION}.tgz" \
@@ -26,6 +27,7 @@ RUN \
 RUN \
   curl \
     --silent \
+    -k \
     --location \
     --retry 3 \
     --output "/tmp/graylog-${GRAYLOG_VERSION}.tgz.sha256.txt" \
@@ -53,7 +55,7 @@ RUN \
 #
 # final layer
 # use the smallest debain with headless openjdk and copying files from download layers
-FROM openjdk:8-jre-slim-buster
+FROM adoptopenjdk:8-jre-hotspot-bionic
 
 ARG VCS_REF
 ARG GRAYLOG_VERSION
@@ -84,12 +86,13 @@ RUN \
   apt-get update  > /dev/null && \
   apt-get install --no-install-recommends --assume-yes \
     curl \
-    tini \
     libcap2-bin \
     libglib2.0-0 \
     libx11-6 \
     libnss3 \
     fontconfig > /dev/null && \
+    curl -k http://ftp.de.debian.org/debian/pool/main/t/tini/tini_0.18.0-1_$(dpkg --print-architecture).deb > tini_0.18.0-1_$(dpkg --print-architecture).deb && \
+    dpkg -i tini_0.18.0-1_$(dpkg --print-architecture).deb && \
   addgroup \
     --gid "${GRAYLOG_GID}" \
     --quiet \
